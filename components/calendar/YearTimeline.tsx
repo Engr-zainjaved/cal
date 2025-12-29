@@ -10,6 +10,7 @@ import { addDays, format } from 'date-fns';
 
 export function YearTimeline() {
   const selectedYear = useCalendarStore((state) => state.selectedYear);
+  const monthsPerRow = useCalendarStore((state) => state.monthsPerRow);
   const { updateEvent } = useCalendarEvents();
 
   const handleDragEnd = (event: DragEndEvent) => {
@@ -42,8 +43,16 @@ export function YearTimeline() {
     });
   };
 
-  // 4 quarters: Q1 (Jan-Mar), Q2 (Apr-Jun), Q3 (Jul-Sep), Q4 (Oct-Dec)
-  const quarters = [0, 3, 6, 9];
+  // Calculate rows dynamically based on monthsPerRow
+  const numRows = Math.ceil(12 / monthsPerRow);
+  const rows = Array.from({ length: numRows }, (_, i) => i * monthsPerRow);
+
+  // Calculate how many months each row should display
+  const getMonthCountForRow = (rowIndex: number) => {
+    const startMonth = rows[rowIndex];
+    const remainingMonths = 12 - startMonth;
+    return Math.min(monthsPerRow, remainingMonths);
+  };
 
   return (
     <DndContext onDragEnd={handleDragEnd}>
@@ -51,11 +60,15 @@ export function YearTimeline() {
         <div className="flex flex-col h-full px-4 py-3">
           <CalendarToolbar />
 
-          {/* 4 Quarter Rows - Each showing 3 months continuously */}
+          {/* Dynamic rows based on monthsPerRow setting */}
           <div className="flex-1 flex flex-col overflow-hidden gap-1">
-            {quarters.map((startMonth) => (
+            {rows.map((startMonth, index) => (
               <div key={startMonth} className="flex-1 min-h-0">
-                <TimelineQuarter year={selectedYear} startMonth={startMonth} />
+                <TimelineQuarter
+                  year={selectedYear}
+                  startMonth={startMonth}
+                  monthCount={getMonthCountForRow(index)}
+                />
               </div>
             ))}
           </div>

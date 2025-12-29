@@ -17,6 +17,7 @@ export const useCalendarStore = create<CalendarStore>()(
       categories: [],
       selectedYear: new Date().getFullYear(),
       gridLayout: '3x4',
+      monthsPerRow: 3,
       isEventModalOpen: false,
       isCategoryManagerOpen: false,
       editingEvent: null,
@@ -102,6 +103,8 @@ export const useCalendarStore = create<CalendarStore>()(
       setSelectedYear: (year) => set({ selectedYear: year }),
 
       setGridLayout: (layout) => set({ gridLayout: layout }),
+
+      setMonthsPerRow: (months) => set({ monthsPerRow: Math.max(1, Math.min(4, months)) }),
 
       openEventModal: (event) => set({
         isEventModalOpen: true,

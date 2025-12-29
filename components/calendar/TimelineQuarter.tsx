@@ -9,16 +9,17 @@ import { format } from 'date-fns';
 
 interface TimelineQuarterProps {
   year: number;
-  startMonth: number; // 0, 3, 6, or 9
+  startMonth: number;
+  monthCount: number; // Number of months to display in this row
 }
 
-export function TimelineQuarter({ year, startMonth }: TimelineQuarterProps) {
+export function TimelineQuarter({ year, startMonth, monthCount }: TimelineQuarterProps) {
   const { getEventsByDateRange } = useCalendarEvents();
 
-  // Get all three months in this quarter
-  const months = [startMonth, startMonth + 1, startMonth + 2];
+  // Get all months in this row
+  const months = Array.from({ length: monthCount }, (_, i) => startMonth + i);
 
-  // Calculate all days across the 3 months
+  // Calculate all days across the months
   const allDays: Array<{
     date: Date;
     dateString: string;
@@ -52,13 +53,14 @@ export function TimelineQuarter({ year, startMonth }: TimelineQuarterProps) {
     }
   });
 
-  // Get events for this quarter
-  const quarterStart = format(new Date(year, startMonth, 1), 'yyyy-MM-dd');
-  const quarterEnd = format(
-    new Date(year, startMonth + 2, getDaysInMonth(new Date(year, startMonth + 2))),
+  // Get events for this row
+  const lastMonth = startMonth + monthCount - 1;
+  const rowStart = format(new Date(year, startMonth, 1), 'yyyy-MM-dd');
+  const rowEnd = format(
+    new Date(year, lastMonth, getDaysInMonth(new Date(year, lastMonth))),
     'yyyy-MM-dd'
   );
-  const events = getEventsByDateRange(quarterStart, quarterEnd);
+  const events = getEventsByDateRange(rowStart, rowEnd);
 
   // Calculate event positioning across the entire quarter
   const eventsWithPosition = events.map((event, index) => {

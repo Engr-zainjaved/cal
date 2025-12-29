@@ -38,6 +38,7 @@ export interface CalendarStore {
   categories: Category[];
   selectedYear: number;
   gridLayout: '3x4' | '4x3';
+  monthsPerRow: number;
   isEventModalOpen: boolean;
   isCategoryManagerOpen: boolean;
   editingEvent: CalendarEvent | null;
@@ -55,6 +56,7 @@ export interface CalendarStore {
   // UI actions
   setSelectedYear: (year: number) => void;
   setGridLayout: (layout: '3x4' | '4x3') => void;
+  setMonthsPerRow: (months: number) => void;
   openEventModal: (event?: CalendarEvent) => void;
   closeEventModal: () => void;
   openCategoryManager: () => void;
