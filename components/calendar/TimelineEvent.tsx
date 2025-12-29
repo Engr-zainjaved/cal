@@ -26,8 +26,9 @@ export function TimelineEvent({ event, startDay, duration, offset }: TimelineEve
 
   const style = {
     backgroundColor: category?.color || '#6B7280',
-    gridColumn: `${startDay} / span ${duration}`,
-    top: `${offset}px`,
+    gridColumnStart: startDay,
+    gridColumnEnd: startDay + duration,
+    marginTop: `${offset}px`,
     transform: transform ? `translate3d(${transform.x}px, ${transform.y}px, 0)` : undefined,
     opacity: isDragging ? 0.5 : 1,
   };
@@ -37,13 +38,13 @@ export function TimelineEvent({ event, startDay, duration, offset }: TimelineEve
       ref={setNodeRef}
       style={style}
       className={cn(
-        'absolute h-4 rounded-sm px-1 text-white cursor-pointer hover:brightness-110 transition-all z-10 flex items-center overflow-hidden pointer-events-auto'
+        'h-4 rounded-full px-2 text-white cursor-pointer hover:brightness-110 transition-all z-10 flex items-center overflow-hidden pointer-events-auto'
       )}
       onClick={() => openEventModal(event)}
       {...listeners}
       {...attributes}
     >
-      <span className="truncate text-[6px] font-medium leading-none">{event.title}</span>
+      <span className="truncate text-[6px] font-medium leading-none whitespace-nowrap">{event.title}</span>
     </div>
   );
 }

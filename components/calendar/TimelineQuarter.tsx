@@ -114,50 +114,48 @@ export function TimelineQuarter({ year, startMonth }: TimelineQuarterProps) {
 
         {/* Day of week headers - only show S S for weekends */}
         <div
-          className="grid gap-px mb-px"
+          className="grid mb-1"
           style={{ gridTemplateColumns: `repeat(${totalDays}, minmax(0, 1fr))` }}
         >
           {allDays.map((day, i) => (
             <div
               key={i}
               className="text-[6px] text-center text-gray-500 dark:text-gray-400 font-medium h-2"
-              style={{ gridColumn: i + 1 }}
             >
               {day.isWeekend ? 'S' : ''}
             </div>
           ))}
         </div>
 
-        {/* Days row */}
-        <div
-          className="grid gap-px relative"
-          style={{ gridTemplateColumns: `repeat(${totalDays}, minmax(0, 1fr))` }}
-        >
-          {allDays.map((day, i) => (
-            <TimelineDay
-              key={day.dateString}
-              date={day.date}
-              dateString={day.dateString}
-              dayNumber={day.dayNumber}
-              isToday={day.isToday}
-              isWeekend={day.isWeekend}
-              columnIndex={i}
-            />
-          ))}
+        {/* Days and Events container */}
+        <div className="relative">
+          {/* Days row */}
+          <div
+            className="grid"
+            style={{ gridTemplateColumns: `repeat(${totalDays}, minmax(0, 1fr))` }}
+          >
+            {allDays.map((day, i) => (
+              <TimelineDay
+                key={day.dateString}
+                date={day.date}
+                dateString={day.dateString}
+                dayNumber={day.dayNumber}
+                isToday={day.isToday}
+                isWeekend={day.isWeekend}
+                columnIndex={i}
+              />
+            ))}
+          </div>
 
-          {/* Events layer */}
+          {/* Events layer - positioned absolutely over the days */}
           <div
             className="absolute left-0 top-4 w-full pointer-events-none"
-            style={{
-              height: 'calc(100% + 40px)',
-              gridColumn: `1 / -1`,
-            }}
+            style={{ minHeight: '60px' }}
           >
             <div
-              className="relative grid gap-px"
+              className="grid"
               style={{
                 gridTemplateColumns: `repeat(${totalDays}, minmax(0, 1fr))`,
-                height: '100%',
               }}
             >
               {eventsWithPosition.map(({ event, startDay, duration, offset }) => (
