@@ -1,16 +1,19 @@
 'use client';
 
-import { CalendarEvent, EventBarSegment } from '@/lib/types/calendar';
+import { CalendarEvent } from '@/lib/types/calendar';
 import { useCategories } from '@/hooks/useCategories';
 import { useCalendarStore } from '@/lib/store/calendar-store';
 import { useDraggable } from '@dnd-kit/core';
+import { cn } from '@/lib/utils';
 
-interface EventBarProps {
-  segment: EventBarSegment;
+interface TimelineEventProps {
+  event: CalendarEvent;
+  startDay: number;
+  duration: number;
+  offset: number;
 }
 
-export function EventBar({ segment }: EventBarProps) {
-  const { event, startCol, endCol, isFirstSegment, isLastSegment } = segment;
+export function TimelineEvent({ event, startDay, duration, offset }: TimelineEventProps) {
   const { getCategoryById } = useCategories();
   const openEventModal = useCalendarStore((state) => state.openEventModal);
 
@@ -22,9 +25,9 @@ export function EventBar({ segment }: EventBarProps) {
   });
 
   const style = {
-    gridColumnStart: startCol,
-    gridColumnEnd: endCol,
     backgroundColor: category?.color || '#6B7280',
+    gridColumn: `${startDay} / span ${duration}`,
+    top: `${offset}px`,
     transform: transform ? `translate3d(${transform.x}px, ${transform.y}px, 0)` : undefined,
     opacity: isDragging ? 0.5 : 1,
   };
@@ -33,17 +36,14 @@ export function EventBar({ segment }: EventBarProps) {
     <div
       ref={setNodeRef}
       style={style}
-      className="relative h-6 px-2 py-0.5 text-xs text-white rounded cursor-pointer hover:brightness-110 transition-all z-10"
+      className={cn(
+        'absolute h-4 rounded-sm px-1 text-white cursor-pointer hover:brightness-110 transition-all z-10 flex items-center overflow-hidden pointer-events-auto'
+      )}
       onClick={() => openEventModal(event)}
       {...listeners}
       {...attributes}
     >
-      {isFirstSegment && (
-        <span className="truncate block">{event.title}</span>
-      )}
-      {!isFirstSegment && !isLastSegment && (
-        <span className="truncate block">...</span>
-      )}
+      <span className="truncate text-[6px] font-medium leading-none">{event.title}</span>
     </div>
   );
 }

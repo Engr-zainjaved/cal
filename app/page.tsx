@@ -1,11 +1,11 @@
-import { YearCalendar } from '@/components/calendar/YearCalendar';
+import { YearTimeline } from '@/components/calendar/YearTimeline';
 import { EventModal } from '@/components/modals/EventModal';
 import { CategoryManager } from '@/components/modals/CategoryManager';
 
 export default function Home() {
   return (
     <>
-      <YearCalendar />
+      <YearTimeline />
       <EventModal />
       <CategoryManager />
     </>

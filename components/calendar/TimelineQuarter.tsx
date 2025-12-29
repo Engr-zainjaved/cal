@@ -1,0 +1,178 @@
+'use client';
+
+import { TimelineDay } from './TimelineDay';
+import { TimelineEvent } from './TimelineEvent';
+import { useCalendarEvents } from '@/hooks/useCalendarEvents';
+import { MONTH_NAMES_SHORT } from '@/lib/constants/calendar-constants';
+import { getDaysInMonth, isToday, getDay } from 'date-fns';
+import { format } from 'date-fns';
+
+interface TimelineQuarterProps {
+  year: number;
+  startMonth: number; // 0, 3, 6, or 9
+}
+
+export function TimelineQuarter({ year, startMonth }: TimelineQuarterProps) {
+  const { getEventsByDateRange } = useCalendarEvents();
+
+  // Get all three months in this quarter
+  const months = [startMonth, startMonth + 1, startMonth + 2];
+
+  // Calculate all days across the 3 months
+  const allDays: Array<{
+    date: Date;
+    dateString: string;
+    dayNumber: number;
+    month: number;
+    isToday: boolean;
+    isWeekend: boolean;
+    dayOfWeek: number;
+  }> = [];
+
+  let cumulativeDayIndex = 0;
+  const monthStartIndices: number[] = [];
+
+  months.forEach((month) => {
+    monthStartIndices.push(cumulativeDayIndex);
+    const daysInMonth = getDaysInMonth(new Date(year, month));
+
+    for (let i = 0; i < daysInMonth; i++) {
+      const date = new Date(year, month, i + 1);
+      const dayOfWeek = getDay(date);
+      allDays.push({
+        date,
+        dateString: format(date, 'yyyy-MM-dd'),
+        dayNumber: i + 1,
+        month,
+        isToday: isToday(date),
+        isWeekend: dayOfWeek === 0 || dayOfWeek === 6,
+        dayOfWeek,
+      });
+      cumulativeDayIndex++;
+    }
+  });
+
+  // Get events for this quarter
+  const quarterStart = format(new Date(year, startMonth, 1), 'yyyy-MM-dd');
+  const quarterEnd = format(
+    new Date(year, startMonth + 2, getDaysInMonth(new Date(year, startMonth + 2))),
+    'yyyy-MM-dd'
+  );
+  const events = getEventsByDateRange(quarterStart, quarterEnd);
+
+  // Calculate event positioning across the entire quarter
+  const eventsWithPosition = events.map((event, index) => {
+    const eventStart = new Date(event.startDate);
+    const eventEnd = new Date(event.endDate);
+
+    // Find which day index the event starts at
+    let startDayIndex = 0;
+    let duration = 0;
+
+    for (let i = 0; i < allDays.length; i++) {
+      const dayDate = allDays[i].date;
+      if (format(dayDate, 'yyyy-MM-dd') === event.startDate) {
+        startDayIndex = i;
+      }
+      if (
+        format(dayDate, 'yyyy-MM-dd') >= event.startDate &&
+        format(dayDate, 'yyyy-MM-dd') <= event.endDate
+      ) {
+        duration++;
+      }
+    }
+
+    return {
+      event,
+      startDay: startDayIndex + 1, // grid-column is 1-based
+      duration: Math.max(duration, 1),
+      offset: index * 18, // Stack events vertically
+    };
+  });
+
+  const totalDays = allDays.length;
+
+  return (
+    <div className="border-b border-gray-200 dark:border-gray-700 py-3 px-2">
+      <div className="relative">
+        {/* Month labels row */}
+        <div className="flex mb-1" style={{ gridTemplateColumns: `repeat(${totalDays}, minmax(0, 1fr))` }}>
+          {months.map((month, idx) => {
+            const daysInMonth = getDaysInMonth(new Date(year, month));
+            const widthPercent = (daysInMonth / totalDays) * 100;
+            return (
+              <div
+                key={month}
+                className="text-xs font-semibold text-gray-700 dark:text-gray-300 text-left"
+                style={{ width: `${widthPercent}%` }}
+              >
+                {MONTH_NAMES_SHORT[month]}
+              </div>
+            );
+          })}
+        </div>
+
+        {/* Day of week headers - only show S S for weekends */}
+        <div
+          className="grid gap-px mb-px"
+          style={{ gridTemplateColumns: `repeat(${totalDays}, minmax(0, 1fr))` }}
+        >
+          {allDays.map((day, i) => (
+            <div
+              key={i}
+              className="text-[6px] text-center text-gray-500 dark:text-gray-400 font-medium h-2"
+              style={{ gridColumn: i + 1 }}
+            >
+              {day.isWeekend ? 'S' : ''}
+            </div>
+          ))}
+        </div>
+
+        {/* Days row */}
+        <div
+          className="grid gap-px relative"
+          style={{ gridTemplateColumns: `repeat(${totalDays}, minmax(0, 1fr))` }}
+        >
+          {allDays.map((day, i) => (
+            <TimelineDay
+              key={day.dateString}
+              date={day.date}
+              dateString={day.dateString}
+              dayNumber={day.dayNumber}
+              isToday={day.isToday}
+              isWeekend={day.isWeekend}
+              columnIndex={i}
+            />
+          ))}
+
+          {/* Events layer */}
+          <div
+            className="absolute left-0 top-4 w-full pointer-events-none"
+            style={{
+              height: 'calc(100% + 40px)',
+              gridColumn: `1 / -1`,
+            }}
+          >
+            <div
+              className="relative grid gap-px"
+              style={{
+                gridTemplateColumns: `repeat(${totalDays}, minmax(0, 1fr))`,
+                height: '100%',
+              }}
+            >
+              {eventsWithPosition.map(({ event, startDay, duration, offset }) => (
+                <TimelineEvent
+                  key={event.id}
+                  event={event}
+                  startDay={startDay}
+                  duration={duration}
+                  offset={offset}
+                />
+              ))}
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}

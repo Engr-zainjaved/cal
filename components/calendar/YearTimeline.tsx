@@ -2,13 +2,13 @@
 
 import { DndContext, DragEndEvent } from '@dnd-kit/core';
 import { CalendarToolbar } from './CalendarToolbar';
-import { MonthGrid } from './MonthGrid';
+import { TimelineQuarter } from './TimelineQuarter';
 import { useCalendarStore } from '@/lib/store/calendar-store';
 import { useCalendarEvents } from '@/hooks/useCalendarEvents';
 import { getEventDuration } from '@/lib/utils/date-utils';
 import { addDays, format } from 'date-fns';
 
-export function YearCalendar() {
+export function YearTimeline() {
   const selectedYear = useCalendarStore((state) => state.selectedYear);
   const { updateEvent } = useCalendarEvents();
 
@@ -42,11 +42,24 @@ export function YearCalendar() {
     });
   };
 
+  // 4 quarters: Q1 (Jan-Mar), Q2 (Apr-Jun), Q3 (Jul-Sep), Q4 (Oct-Dec)
+  const quarters = [0, 3, 6, 9];
+
   return (
     <DndContext onDragEnd={handleDragEnd}>
-      <div className="container mx-auto p-6">
-        <CalendarToolbar />
-        <MonthGrid year={selectedYear} />
+      <div className="h-screen overflow-hidden bg-background">
+        <div className="flex flex-col h-full px-4 py-3">
+          <CalendarToolbar />
+
+          {/* 4 Quarter Rows - Each showing 3 months continuously */}
+          <div className="flex-1 flex flex-col overflow-hidden gap-1">
+            {quarters.map((startMonth) => (
+              <div key={startMonth} className="flex-1 min-h-0">
+                <TimelineQuarter year={selectedYear} startMonth={startMonth} />
+              </div>
+            ))}
+          </div>
+        </div>
       </div>
     </DndContext>
   );
