@@ -123,3 +123,45 @@
     @apply bg-background text-foreground;
   }
 }
+
+/* Calendar-specific styles */
+.calendar-scrollbar::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+.calendar-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.calendar-scrollbar::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 4px;
+}
+
+.calendar-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}
+
+/* Event bar animation */
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.event-bar-enter {
+  animation: slideIn 0.2s ease-out;
+}
+
+/* Responsive grid adjustments */
+@media (max-width: 768px) {
+  .month-card {
+    min-width: 100%;
+  }
+}
