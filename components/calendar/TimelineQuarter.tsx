@@ -94,8 +94,18 @@ export function TimelineQuarter({ year, startMonth, monthCount }: TimelineQuarte
 
   const totalDays = allDays.length;
 
+  // Calculate dynamic height based on number of events
+  // Each event takes 18px (14px height + 4px gap), plus base height for days (16px)
+  const eventHeight = 18; // matches the offset calculation
+  const baseHeight = 16; // height for the day numbers row
+  const minEventsHeight = 60; // minimum space for events
+  const calculatedEventsHeight = eventsWithPosition.length > 0
+    ? Math.max(eventsWithPosition.length * eventHeight, minEventsHeight)
+    : minEventsHeight;
+  const totalContainerHeight = baseHeight + calculatedEventsHeight;
+
   return (
-    <div className="border-b border-gray-200 dark:border-gray-700 py-3 px-2">
+    <div className="py-3 px-2">
       <div className="relative">
         {/* Month labels row */}
         <div className="flex mb-1" style={{ gridTemplateColumns: `repeat(${totalDays}, minmax(0, 1fr))` }}>
@@ -129,8 +139,8 @@ export function TimelineQuarter({ year, startMonth, monthCount }: TimelineQuarte
           ))}
         </div>
 
-        {/* Days and Events container */}
-        <div className="relative">
+        {/* Days and Events container - dynamically sized */}
+        <div className="relative" style={{ height: `${totalContainerHeight}px` }}>
           {/* Days row */}
           <div
             className="grid"
@@ -152,7 +162,7 @@ export function TimelineQuarter({ year, startMonth, monthCount }: TimelineQuarte
           {/* Events layer - positioned absolutely over the days */}
           <div
             className="absolute left-0 top-4 w-full pointer-events-none"
-            style={{ minHeight: '60px' }}
+            style={{ height: `${calculatedEventsHeight}px` }}
           >
             <div
               className="grid"
